@@ -1,2 +1,2 @@
-# vStamps
+# VStamps
 Search video for timestamps
