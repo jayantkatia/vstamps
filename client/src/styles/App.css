@@ -1,0 +1,30 @@
+.App {
+  min-height: 100vh;
+  display: flex; /*clear margin*/
+  flex-direction: column; /* to center */
+  background-color: #282c34;
+  color: aliceblue;
+}
+.large {
+  font-size: large;
+}
+.App-header {
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.github-logo {
+  background-color: white;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+}
+.github-logo>img{
+  width: 40px;
+  height: 40px;
+  fill: white;
+}
