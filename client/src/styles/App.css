@@ -2,9 +2,13 @@
   min-height: 100vh;
   display: flex; /*clear margin*/
   flex-direction: column; /* to center */
-  background-color: #282c34;
+  /* background-color: #282c34; */
+  background-color: #9dc5c3;
+  background-image: linear-gradient(120deg, #9dc5c3 0%, #5e5c5c 54%);
   color: aliceblue;
+  justify-content: space-between;
 }
+
 .large {
   font-size: large;
 }
@@ -27,4 +31,10 @@
   width: 40px;
   height: 40px;
   fill: white;
+}
+
+footer{
+  font-size: smaller;
+  text-align: center;
+  margin: 5px;
 }

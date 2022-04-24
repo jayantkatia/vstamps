@@ -1,0 +1,53 @@
+.form-container{
+    display: flex;
+    padding: 20px;
+    text-align: center;
+    justify-content: center;
+}
+
+.form-container>form{
+    max-width: max-content;
+    padding: 20px;
+}
+
+.drag-container{
+    border: aliceblue dashed 5px;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px;
+    background: #999;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #999;
+}
+
+.button:hover {
+    background: #bbb;
+}
+
+#user-video {
+    border: none;
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+input[type=text] {
+    margin: 20px 0;
+    border-radius: 5px;
+    width: 90%;
+    font-size: large;
+    padding: 2px;
+}
+input[type=submit].button {
+    background: #555;
+    font-size: inherit;
+    color: aliceblue;
+}
+input[type=submit].button:hover {
+    background: #777;
+}
