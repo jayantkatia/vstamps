@@ -56,7 +56,11 @@
     pointer-events: none;
 }
 
-input[type=text] {
+.small-text {
+    font-size: small;
+}
+
+.form-container input[type=text] {
     width: 100%;
     box-sizing: border-box;
     border-radius: 5px;

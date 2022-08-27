@@ -1,0 +1,45 @@
+#result-page {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100vh;
+}
+
+#search-bar {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: fit-content;
+    text-align: center;
+    background-color: whitesmoke;
+    padding: 2rem;
+    border-bottom: 1px solid lightgray;
+}
+
+#search-bar input[type=text] {
+    width: 50%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    font-size: medium;
+    padding: 5px;
+    background: white url("~/public/icons8-search.gif") no-repeat 5px 20%;
+    background-size: 1.5rem;
+    padding-left: 45px;
+}
+
+#result-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#load-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+#load-container p{
+    margin: 1rem;
+    font-size: large;
+}
