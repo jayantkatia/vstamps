@@ -35,11 +35,41 @@
 }
 
 #load-container {
+    width: 100%;
     display: flex;
-    justify-content: space-around;
+    align-items: center;
+    justify-content: center;
 }
 
 #load-container p{
     margin: 1rem;
     font-size: large;
+}
+
+#transcriptions-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-content: space-between;
+    margin: 5px;
+}
+.tile {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 1px 2rem;
+    border: 1px solid black;
+}
+
+.tile span {
+    margin: 0 1rem;
+    word-wrap: normal;
+}
+
+.tile span {
+    margin: 0 1rem;
+    word-wrap: normal;
+}
+
+.tile span.time {
+    font-weight: 600;
 }
