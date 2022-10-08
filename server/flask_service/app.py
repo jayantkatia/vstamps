@@ -1,11 +1,20 @@
+from __future__ import unicode_literals
 from flask import Flask
+from flask_cors import CORS, cross_origin
 from flask import request
 import pandas as pd
 import wave
 import json
+import youtube_dl
+import os
 from vosk import Model, KaldiRecognizer, SetLogLevel
 app = Flask(__name__)
+cors = CORS(app)
 
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+model_path = "./vosk-model-en-us-0.21"
+model = Model(model_path)
 
 class Word:
     ''' A class representing a word from the JSON format for vosk speech recognition API '''
@@ -32,6 +41,7 @@ class Word:
 
 
 @app.route('/')
+@cross_origin()
 def hello_world():
     return 'Hello, World!'
 
@@ -39,20 +49,43 @@ def hello_world():
 @app.route('/recieveAudioFile', methods=['POST'])
 def recieveAudioFile():
     if request.method == 'POST':
-        print('***** Recieving Audio File *****')
-        save_path = "./temp.wav"
-        file = request.files['audiofile']
-        file.save(save_path)
-        print('***** Audio File Saved *****')
+
+        if(os.path.exists('temp.wav')):
+            os.remove('temp.wav')
+
+        if request.form.get("inputType") == "url":
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'wav',
+                    'preferredquality': '192'
+                }],
+                'postprocessor_args': [
+                    '-ar', '16000'
+                ],
+                'prefer_ffmpeg': True,
+                'outtmpl': './temp.wav'
+            }
+
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                ydl.download((request.form.get("inputData"),))
+        else: 
+            print('***** Recieving Audio File *****')
+            save_path = "./temp.wav"
+            print(request)
+            print(request.form.get("inputType"))
+            print(request.files)
+            file = request.files['inputData']
+            file.save(save_path)
+            print('***** Audio File Saved *****')
     return getData()
 
 
 def getData():
     print("***** Processing Audio File *****")
-    model_path = "./vosk-model-en-us-0.21"
     audio_filename = "./temp.wav"
 
-    model = Model(model_path)
     wf = wave.open(audio_filename, "rb")
     rec = KaldiRecognizer(model, wf.getframerate())
     rec.SetWords(True)
