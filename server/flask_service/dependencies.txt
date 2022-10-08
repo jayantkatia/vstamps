@@ -1,0 +1,5 @@
+pip install flask_cors
+pip install youtube_dl
+sudo apt-get install ffmpeg
+
+wget https://alphacephei.com/vosk/models/vosk-model-en-us-0.21.zip
