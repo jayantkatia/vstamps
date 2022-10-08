@@ -13,9 +13,6 @@ cors = CORS(app)
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-model_path = "./vosk-model-en-us-0.21"
-model = Model(model_path)
-
 class Word:
     ''' A class representing a word from the JSON format for vosk speech recognition API '''
 
@@ -84,8 +81,10 @@ def recieveAudioFile():
 
 def getData():
     print("***** Processing Audio File *****")
+    model_path = "./vosk-model-en-us-0.21"
     audio_filename = "./temp.wav"
 
+    model = Model(model_path)
     wf = wave.open(audio_filename, "rb")
     rec = KaldiRecognizer(model, wf.getframerate())
     rec.SetWords(True)
