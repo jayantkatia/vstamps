@@ -2,16 +2,23 @@ from __future__ import unicode_literals
 from flask import Flask
 from flask_cors import CORS, cross_origin
 from flask import request
-import pandas as pd
-import wave
 import json
-import youtube_dl
+import logging as log
 import os
+import pandas as pd
+from pytube import YouTube
 from vosk import Model, KaldiRecognizer, SetLogLevel
+import wave
+
 app = Flask(__name__)
 cors = CORS(app)
 
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+# save logs in a file
+log.basicConfig(filename='app.log', filemode='w',
+                format='%(name)s - %(levelname)s - %(message)s', level=log.DEBUG)
+
 
 class Word:
     ''' A class representing a word from the JSON format for vosk speech recognition API '''
@@ -40,46 +47,111 @@ class Word:
 @app.route('/')
 @cross_origin()
 def hello_world():
-    return 'Hello, World!'
+    return 'Hello, World! VStamps Flask Backend Service up and running!'
 
 
 @app.route('/recieveAudioFile', methods=['POST'])
 def recieveAudioFile():
-    if request.method == 'POST':
 
-        if(os.path.exists('temp.wav')):
+    # Cleanup
+    try:
+        if (os.path.exists('temp.wav')):
             os.remove('temp.wav')
+    except Exception as e:
+        log.exception(
+            f"/recieveAudioFile | Error deleting temp.wav, error: {e}")
+        raise e
 
+    try:
+        if (os.path.exists('video.mp4')):
+            os.remove('video.mp4')
+    except Exception as e:
+        log.exception(
+            f"/recieveAudioFile | Error deleting video.mp4, error: {e}")
+        raise e
+
+    try:
+        if (os.path.exists('out.srt')):
+            os.remove('out.srt')
+    except Exception as e:
+        log.exception(
+            f"/recieveAudioFile | Error deleting out.srt, error: {e}")
+        raise e
+
+    log.info("/recieveAudioFile | Cleanup Completed")
+
+    # Get the file
+    if request.method == 'POST':
         if request.form.get("inputType") == "url":
-            ydl_opts = {
-                'format': 'bestaudio/best',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'wav',
-                    'preferredquality': '192'
-                }],
-                'postprocessor_args': [
-                    '-ar', '16000'
-                ],
-                'prefer_ffmpeg': True,
-                'outtmpl': './temp.wav'
-            }
+            url = request.form.get("inputData")
+            if url == "":
+                log.error("No URL provided")
+                return "No URL provided"
 
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                ydl.download((request.form.get("inputData"),))
-        else: 
-            print('***** Recieving Audio File *****')
+            # download youtube video in mp4
+            yt = YouTube(url)
+            try:
+                yt.streams.filter(progressive=True, file_extension='mp4').order_by(
+                    'resolution')[-1].download()
+            except Exception as e:
+                log.exception(
+                    f"/recieveAudioFile | Error downloading video from youtube, error: {e}")
+                raise e
+            try:
+                os.rename(yt.streams.first().default_filename.split(
+                    '.')[0]+'.mp4', 'video.mp4')
+            except Exception as e:
+                log.exception(
+                    f"/recieveAudioFile | Error renaming video file, error: {e}")
+                raise e
+            log.info("/recieveAudioFile | Video Downloaded")
+            return getDataUpdated("video.mp4")
+
+        elif request.form.get("inputType") == "file":
+            log.info('***** Recieving Audio File *****')
             save_path = "./temp.wav"
-            print(request)
-            print(request.form.get("inputType"))
-            print(request.files)
             file = request.files['inputData']
             file.save(save_path)
-            print('***** Audio File Saved *****')
-    return getData()
+            log.info('***** Audio File Saved *****')
+            if request.form.get("wordWise") == "true":
+                return getDataWordWise()
+
+            return getDataUpdated("temp.wav")
+
+        else:
+            log.error("Wrong input type provided")
+            return "Wrong input type provided"
+
+    else:
+        log.error("Invalid request method")
+        return "Invalid request method"
 
 
-def getData():
+def getDataUpdated(filetype: str):
+    if filetype == "video.mp4" or filetype == "temp.wav":
+        try:
+            os.system(f'vosk-transcriber -i {filetype} -t srt -o out.srt')
+        except Exception as e:
+            log.exception(
+                f"getDataUpdated | Error executing vosk-transcriber, error: {e}")
+            raise e
+        log.info("getDataUpdated | transcribing executed successfully")
+
+        # return srt file OR any other suitable format
+        try:
+            with open('out.srt', 'r') as f:
+                return f.read()
+        except Exception as e:
+            log.exception(
+                f"getDataUpdated | Error reading srt file, error: {e}")
+            raise e
+
+    else:
+        log.error("getDataUpdated | Invalid filetype provided")
+        return "Invalid filetype provided"
+
+
+def getDataWordWise():
     print("***** Processing Audio File *****")
     model_path = "./vosk-model-en-us-0.21"
     audio_filename = "./temp.wav"
