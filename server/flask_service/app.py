@@ -204,3 +204,6 @@ def getDataWordWise():
                   'start_timestamp(sec)', 'end_timestamp(sec)', 'confidence']
     print('***** Timestamping for Transcript', i, 'done! *****')
     return df.to_json(orient="split")
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')

@@ -63,16 +63,16 @@
     border: 1px solid black;
 }
 
-.tile span {
+.tile span a{
     margin: 0 1rem;
     word-wrap: normal;
 }
 
-.tile span {
+.tile span a{
     margin: 0 1rem;
     word-wrap: normal;
 }
 
-.tile span.time {
+.tile span.time a{
     font-weight: 600;
 }

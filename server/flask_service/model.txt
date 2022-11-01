@@ -1,0 +1,1 @@
+wget https://alphacephei.com/vosk/models/vosk-model-en-us-0.21.zip
