@@ -7,7 +7,7 @@ import logging as log
 import os
 import pandas as pd
 from pytube import YouTube
-from vosk import Model, KaldiRecognizer, SetLogLevel
+from vosk import Model, KaldiRecognizer
 import wave
 
 app = Flask(__name__)
@@ -21,17 +21,21 @@ log.basicConfig(filename='app.log', filemode='w',
 
 
 class Word:
-    ''' A class representing a word from the JSON format for vosk speech recognition API '''
+    """
+    A class representing a word from the JSON format for vosk speech recognition API 
+    This is being used to create a formatted output with the recognized words and their timestamps
+    Using this we further create a dataframe with the recognized words and their timestamps
+    """
 
     def __init__(self, dict):
-        '''
+        """
         Parameters:
           dict (dict) dictionary from JSON, containing:
             conf (float): degree of confidence, from 0 to 1
             end (float): end time of the pronouncing the word, in seconds
             start (float): start time of the pronouncing the word, in seconds
             word (str): recognized word
-        '''
+        """
 
         self.conf = dict["conf"]
         self.end = dict["end"]
@@ -51,8 +55,16 @@ def hello_world():
 
 
 @app.route('/recieveAudioFile', methods=['POST'])
-def recieveAudioFile():
+def recieve_audio_file():
+    """
+    Receives the audio file from the frontend and saves it as temp.wav
+    OR
+    Receives the video file from the frontend and saves it as video.mp4
+    OR
+    Receives the URL of the video from the frontend and saves it as video.mp4
 
+    Further, calls the function to transcribe the audio file and returns the data
+    """
     # Cleanup
     try:
         if (os.path.exists('temp.wav')):
@@ -105,7 +117,20 @@ def recieveAudioFile():
                     f"/recieveAudioFile | Error renaming video file, error: {e}")
                 raise e
             log.info("/recieveAudioFile | Video Downloaded")
-            return getDataUpdated("video.mp4")
+
+            if request.form.get("wordWise") == "true":
+                # convert video to audio if wordWise is true
+                try:
+                    os.system(
+                        'ffmpeg -i video.mp4 -acodec pcm_s16le -ac 1 -ar 16000 temp.wav')
+                except Exception as e:
+                    log.exception(
+                        f"/recieveAudioFile | Error converting video to audio, error: {e}")
+                    raise e
+                log.info("/recieveAudioFile | Video converted to audio")
+                return get_data_word_wise()
+
+            return get_data_line_wise("video.mp4")
 
         elif request.form.get("inputType") == "file":
             log.info('***** Recieving Audio File *****')
@@ -113,29 +138,37 @@ def recieveAudioFile():
             file = request.files['inputData']
             file.save(save_path)
             log.info('***** Audio File Saved *****')
-            if request.form.get("wordWise") == "true":
-                return getDataWordWise()
 
-            return getDataUpdated("temp.wav")
+            if request.form.get("wordWise") == "true":
+                return get_data_word_wise()
+
+            return get_data_line_wise("temp.wav")
 
         else:
-            log.error("Wrong input type provided")
+            log.error("/recieveAudioFile | Wrong input type provided")
             return "Wrong input type provided"
 
     else:
-        log.error("Invalid request method")
+        log.error("/recieveAudioFile | Invalid request method")
         return "Invalid request method"
 
 
-def getDataUpdated(filetype: str):
+def get_data_line_wise(filetype: str):
+    """
+    Returns a stringified srt file containing the data for the line-wise transcription
+
+    Parameters:
+        filetype (str): type of file, either "video.mp4" or "temp.wav"
+    """
+    log.info("****** Transcribing Line Wise *****")
     if filetype == "video.mp4" or filetype == "temp.wav":
         try:
             os.system(f'vosk-transcriber -i {filetype} -t srt -o out.srt')
         except Exception as e:
             log.exception(
-                f"getDataUpdated | Error executing vosk-transcriber, error: {e}")
+                f"get_data_line_wise | Error executing vosk-transcriber, error: {e}")
             raise e
-        log.info("getDataUpdated | transcribing executed successfully")
+        log.info("get_data_line_wise | transcribing executed successfully")
 
         # return srt file OR any other suitable format
         try:
@@ -143,67 +176,102 @@ def getDataUpdated(filetype: str):
                 return f.read()
         except Exception as e:
             log.exception(
-                f"getDataUpdated | Error reading srt file, error: {e}")
+                f"get_data_line_wise | Error reading srt file, error: {e}")
             raise e
 
     else:
-        log.error("getDataUpdated | Invalid filetype provided")
+        log.error("get_data_line_wise | Invalid filetype provided")
         return "Invalid filetype provided"
 
 
-def getDataWordWise():
-    print("***** Processing Audio File *****")
+def get_data_word_wise():
+    """
+    Returns a DataFrame as JSON object containing the data for the word-wise transcription
+    """
+    log.info("***** Transciribing WordWise | Processing Audio File *****")
     model_path = "./vosk-model-en-us-0.21"
     audio_filename = "./temp.wav"
 
-    model = Model(model_path)
-    wf = wave.open(audio_filename, "rb")
-    rec = KaldiRecognizer(model, wf.getframerate())
-    rec.SetWords(True)
+    try:
+        model = Model(model_path)
+    except Exception as e:
+        log.exception(
+            f"get_data_word_wise | Error loading model, error: {e}")
+        raise e
+
+    try:
+        wf = wave.open(audio_filename, "rb")
+        rec = KaldiRecognizer(model, wf.getframerate())
+        rec.SetWords(True)
+    except Exception as e:
+        log.exception(
+            f"get_data_word_wise | Error loading audio file, error: {e}")
+        raise e
 
     # get the list of JSON dictionaries
     results = []
     # recognize speech using vosk model
-    while True:
-        data = wf.readframes(4000)
-        if len(data) == 0:
-            break
-        if rec.AcceptWaveform(data):
-            part_result = json.loads(rec.Result())
-            results.append(part_result)
-    part_result = json.loads(rec.FinalResult())
-    results.append(part_result)
+
+    try:
+        while True:
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            if rec.AcceptWaveform(data):
+                part_result = json.loads(rec.Result())
+                results.append(part_result)
+        part_result = json.loads(rec.FinalResult())
+        results.append(part_result)
+    except Exception as e:
+        log.exception(
+            f"get_data_word_wise | Error recognizing speech and wave forms, error: {e}")
+        raise e
 
     # convert list of JSON dictionaries to list of 'Word' objects
     list_of_Words = []
-    for sentence in results:
-        if len(sentence) == 1:
-            # sometimes there are bugs in recognition
-            # and it returns an empty dictionary
-            # {'text': ''}
-            continue
-        for obj in sentence['result']:
-            w = Word(obj)  # create custom Word object
-            list_of_Words.append(w)  # and add it to list
+    try:
+        for sentence in results:
+            if len(sentence) == 1:
+                # sometimes there are bugs in recognition
+                # and it returns an empty dictionary
+                # {'text': ''}
+                continue
+            for obj in sentence['result']:
+                w = Word(obj)  # create custom Word object
+                list_of_Words.append(w)  # and add it to list
 
-    wf.close()  # close audiofile
+        wf.close()  # close audiofile
+    except Exception as e:
+        log.exception(
+            f"get_data_word_wise | Error creating Word objects, error: {e}")
+        raise e
 
-    master_list = []
-    for j in range(len(list_of_Words)):
-        l = list_of_Words[j].to_string().split(' ')
-        while "" in l:
-            l.remove("")
-        master_list.append(l)
+    # extract timestamps from list of 'Word' objects
+    # then convert list of 'Word' objects to DataFrame
+    list_of_list_of_Words = []
+    try:
+        for j in range(len(list_of_Words)):
+            raw_words_list = list_of_Words[j].to_string().split(' ')
+            while "" in raw_words_list:
+                raw_words_list.remove("")
+            list_of_list_of_Words.append(raw_words_list)
 
-    i = 1
-    df = pd.DataFrame(master_list)
-    df = df.drop([1, 3, 4, 6, 7, 8], axis=1)
-    transcript_id = [i for _ in range(len(master_list))]
-    df.insert(0, 'transcript_id', transcript_id)
-    df.columns = ['transcript_id', 'word',
-                  'start_timestamp(sec)', 'end_timestamp(sec)', 'confidence']
-    print('***** Timestamping for Transcript', i, 'done! *****')
+        i = 1  # id of transcript currently set to 1 and can be dynamically changed
+        df = pd.DataFrame(list_of_list_of_Words)
+        df = df.drop([1, 3, 4, 6, 7, 8], axis=1)
+        transcript_id = [i for _ in range(len(list_of_list_of_Words))]
+        df.insert(0, 'transcript_id', transcript_id)
+        df.columns = ['transcript_id', 'word',
+                      'start_timestamp(sec)', 'end_timestamp(sec)', 'confidence']
+    except Exception as e:
+        log.exception(
+            f"get_data_word_wise | Error extracting timestamps and in DataFrame Generation, error: {e}")
+        raise e
+
+    log.info('***** Timestamping for Transcript', i,
+             'done! Returning DataFrame as JSON object *****')
     return df.to_json(orient="split")
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

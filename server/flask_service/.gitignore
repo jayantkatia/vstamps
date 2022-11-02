@@ -171,3 +171,8 @@ cython_debug/
 
 # Model
 vosk-model-en-us-0.21/
+
+# Data
+out.srt 
+video.mp4
+temp.wav
