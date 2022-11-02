@@ -8,7 +8,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Router>
     <Routes>
-      <Route path='/vstamps/' element={<App/>} />
+      <Route path='/' element={<App/>} />
     </Routes>
   </Router>
 );
