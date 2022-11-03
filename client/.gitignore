@@ -22,4 +22,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-package-lock.json
+## recommended to include in open source
+# package-lock.json
+
+# environment
+.env

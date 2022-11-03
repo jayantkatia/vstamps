@@ -1,17 +1,19 @@
 # syntax=docker/dockerfile:1
 
-ARG SERVER_PORT
-
+# build on debian with python v3.10
 FROM python:3.10-slim
-WORKDIR /vstamps_server
-ENV SERVER_PORT=$SERVER_PORT
 
+# change cwd
+WORKDIR /vstamps_server
+
+# update and install ffmpeg
 RUN apt-get update
 RUN apt-get install -y ffmpeg
 RUN pip install --upgrade pip
 
+# install python packages
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
-EXPOSE $SERVER_PORT
+
+# copy code
 COPY . .
-ENV FLASK_APP=app

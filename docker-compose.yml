@@ -1,19 +1,20 @@
 version: "3.3"
 services:
   client:
-    build: 
+    build:
       context: ./client/
       args:
-        CLIENT_PORT: 3000
-        SERVER_PORT: 5000
+        CLIENT_PORT: ${CLIENT_PORT}
+        SERVER_PORT: ${SERVER_PORT}
+        SERVER_PROTOCOL: ${SERVER_PROTOCOL}
+        SERVER_URL: ${SERVER_URL}
     ports:
-      - 3000:3000
-    command: serve -s build -p 3000
+      - ${EXPOSED_CLIENT_PORT}:${CLIENT_PORT}
+    command: serve -s build -p ${CLIENT_PORT}
+
   server:
     build: 
       context: ./server/flask_service
-      args:
-        SERVER_PORT: 5000
     ports:
-      - 5000:5000
+      - ${EXPOSED_SERVER_PORT}:${SERVER_PORT}
     command: python app.py

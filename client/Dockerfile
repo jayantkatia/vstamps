@@ -1,19 +1,27 @@
 # syntax=docker/dockerfile:1
 
-ARG CLIENT_PORT
+# build on alpine linux with node's latest stable verion
+FROM node:lts-alpine
+
+# get all arguments
+ARG SERVER_PROTOCOL
+ARG SERVER_URL
 ARG SERVER_PORT
 
-FROM node:lts-alpine
+# change cwd
 WORKDIR /vstamps_client
-ENV REACT_APP_SERVER_URL=127.0.0.1
-ENV REACT_APP_SERVER_PORT=$SERVER_PORT
-ENV REACT_APP_SERVER_PROTOCOL=http
 
+# install ffmpeg, node_modules and serve
 RUN apk add --no-cache ffmpeg
 COPY ./package*.json .
 RUN npm install --quiet
 RUN npm install -g serve
-EXPOSE $CLIENT_PORT
-EXPOSE $SERVER_PORT
+
+# copy code
 COPY . .
-RUN npm build
+
+# create production build
+RUN REACT_APP_SERVER_PROTOCOL=${SERVER_PROTOCOL} \
+  REACT_APP_SERVER_URL=${SERVER_URL} \
+  REACT_APP_SERVER_PORT=${SERVER_PORT} \ 
+  npm run build
