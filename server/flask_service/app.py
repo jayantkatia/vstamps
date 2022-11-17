@@ -22,7 +22,7 @@ log.basicConfig(filename='app.log', filemode='w',
 
 class Word:
     """
-    A class representing a word from the JSON format for vosk speech recognition API 
+    A class representing a word from the JSON format for vosk speech recognition API
     This is being used to create a formatted output with the recognized words and their timestamps
     Using this we further create a dataframe with the recognized words and their timestamps
     """
@@ -90,6 +90,14 @@ def recieve_audio_file():
             f"/recieveAudioFile | Error deleting out.srt, error: {e}")
         raise e
 
+    try:
+        if not os.path.exists('./cache'):
+            os.mkdir('./cache')
+    except Exception as e:
+        log.exception(
+            f"/recieveAudioFile | Error creating cache directory, error: {e}")
+        raise e
+
     log.info("/recieveAudioFile | Cleanup Completed")
 
     # Get the file
@@ -99,6 +107,19 @@ def recieve_audio_file():
             if url == "":
                 log.error("No URL provided")
                 return "No URL provided"
+
+            # get video id from youtube url
+            video_id = url.split("v=")[1]
+
+            # check if .srt file exists in cache directory
+            if os.path.exists(f'./cache/{video_id}.srt'):
+                log.info("SRT file found in cache, returning.")
+                return return_srt(f'./cache/{video_id}.srt')
+
+            if os.path.exists(f'./cache/{video_id}_wordWise.json'):
+                log.info("JSON file found in cache, returning.")
+                with open(f'./cache/{video_id}_wordWise.json') as f:
+                    return json.load(f)
 
             # download youtube video in mp4
             yt = YouTube(url)
@@ -128,9 +149,9 @@ def recieve_audio_file():
                         f"/recieveAudioFile | Error converting video to audio, error: {e}")
                     raise e
                 log.info("/recieveAudioFile | Video converted to audio")
-                return get_data_word_wise()
+                return get_data_word_wise(video_id)
 
-            return get_data_line_wise("video.mp4")
+            return get_data_line_wise("video.mp4", video_id)
 
         elif request.form.get("inputType") == "file":
             log.info('***** Recieving Audio File *****')
@@ -153,7 +174,7 @@ def recieve_audio_file():
         return "Invalid request method"
 
 
-def get_data_line_wise(filetype: str):
+def get_data_line_wise(filetype: str, video_id: str = None):
     """
     Returns a stringified srt file containing the data for the line-wise transcription
 
@@ -170,25 +191,26 @@ def get_data_line_wise(filetype: str):
             raise e
         log.info("get_data_line_wise | transcribing executed successfully")
 
+        # move out.srt to ./cache/video_id.srt if filetype == "video.mp4"
+        if filetype == "video.mp4":
+            os.rename('out.srt', f'./cache/{video_id}.srt')
+            log.info(
+                f"get_data_line_wise | out.srt moved to cache as {video_id}.srt")
+            return return_srt(f'./cache/{video_id}.srt')
+
         # return srt file OR any other suitable format
-        try:
-            with open('out.srt', 'r') as f:
-                return f.read()
-        except Exception as e:
-            log.exception(
-                f"get_data_line_wise | Error reading srt file, error: {e}")
-            raise e
+        return return_srt("out.srt")
 
     else:
         log.error("get_data_line_wise | Invalid filetype provided")
         return "Invalid filetype provided"
 
 
-def get_data_word_wise():
+def get_data_word_wise(video_id: str = None):
     """
     Returns a DataFrame as JSON object containing the data for the word-wise transcription
     """
-    log.info("***** Transciribing WordWise | Processing Audio File *****")
+    log.info("***** Transciribing wordWise | Processing Audio File *****")
     model_path = "./vosk-model-en-us-0.21"
     audio_filename = "./temp.wav"
 
@@ -270,7 +292,29 @@ def get_data_word_wise():
 
     log.info('***** Timestamping for Transcript', i,
              'done! Returning DataFrame as JSON object *****')
+
+    # save dataframe to cache in json format if it was a youtube video.
+    if video_id:
+        df.to_json(f'./cache/{video_id}_wordWise.json')
+        log.info(
+            f"get_data_word_wise | DataFrame saved to cache as {video_id}_wordWise.json")
+
     return df.to_json(orient="split")
+
+
+def return_srt(filename: str):
+    """
+    Returns the srt file as a JSON object
+    """
+    log.info("***** Returning srt file as JSON object *****")
+    log.info(f"Return SRT from {filename}")
+    try:
+        with open(f'{filename}', 'r') as f:
+            return f.read()
+    except Exception as e:
+        log.exception(
+            f"return_srt | Error reading srt file, error: {e}")
+        raise e
 
 
 if __name__ == "__main__":
