@@ -5,6 +5,8 @@
   background-color: whitesmoke;
   color: black;
   justify-content: space-between;
+  background-image: url("../assets/background.jpeg");
+  background-size: cover;
 }
 
 .large {

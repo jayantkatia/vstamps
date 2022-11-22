@@ -20,6 +20,10 @@ const Form = (props) => {
                     <label className="button" htmlFor="user-video">Select video/audio</label>
                     <p className='small-text'>{props.file.replace(/\\/g, "/").split('/').pop()}</p>
                 </div>
+                <div className="checkbox-container">
+                    <input name="wordWise" id="wordWise" type="checkbox" value={true} onChange={props.onIsWordWiseHandle}/> 
+                    <label htmlFor="wordWise"> Get word-wise timestamps</label>
+                </div>
                 <input type="submit" className="button" />
             </form>
         </div>

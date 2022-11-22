@@ -21,7 +21,7 @@ const OperationStatus = {
 const Loading = (props) => {
   return (
     <div id="load-container">
-      <HashLoader color={"#4BB543"} loading={true} /> <p>{props.loadingStatus}</p>
+      <HashLoader color={"#808080"} loading={true} /> <p>{props.loadingStatus}</p>
       <br />
     </div>
   );
@@ -29,9 +29,12 @@ const Loading = (props) => {
 
 const Tile = (props) => {
   return (
-    <div className="tile" key={props.uniqueKey}>
+    <div className="tile">
       {props.isIFrame ? (
-        <a href={`https://youtu.be/${props.videoId}?t=${Math.floor(props.startSeconds)}`} className="time">
+        <a
+          href={`https://youtu.be/${props.videoId}?t=${Math.floor(props.startSeconds)}`}
+          className="time"
+        >
           {props.time}
         </a>
       ) : (
@@ -45,20 +48,44 @@ const Tile = (props) => {
 const Transcriptions = (props) => {
   return (
     <div id="transcriptions-container">
-      {props.result.map((data) => {
-        if (!props.keyword || data.text.includes(props.keyword))
-          return (
-            <Tile
-              uniqueKey={data.startTime}
-              time={`${data.startTime.split(',')[0]} - ${data.endTime.split(',')[0]}`}
-              words={data.text}
-              isIFrame={props.isIFrame}
-              videoId={props.videoId}
-              startSeconds={data.startSeconds}
-            />
-          );
-        return <></>;
-      })}
+      <div className="tile bold">
+        <span>Time</span> <span>Words</span>
+      </div>
+      {props.isWordWise === "true" ? (
+        <>
+          {props.result.data.map((tile) => {
+            if (!props.keyword || tile[1].includes(props.keyword))
+              return (
+                <Tile
+                  key={tile[2]}
+                  time={`${tile[2]}-${tile[3]}`}
+                  words={tile[1]}
+                  isIFrame={props.isIFrame}
+                  videoId={props.videoId}
+                  startSeconds={Number(tile[2])}
+                />
+              );
+            return <></>;
+          })}
+        </>
+      ) : (
+        <>
+          {props.result.map((data) => {
+            if (!props.keyword || data.text.includes(props.keyword))
+              return (
+                <Tile
+                  key={data.startTime}
+                  time={`${data.startTime.split(",")[0]} - ${data.endTime.split(",")[0]}`}
+                  words={data.text}
+                  isIFrame={props.isIFrame}
+                  videoId={props.videoId}
+                  startSeconds={data.startSeconds}
+                />
+              );
+            return <></>;
+          })}
+        </>
+      )}
     </div>
   );
 };
@@ -103,15 +130,22 @@ const Result = (props) => {
     const formData = new FormData();
     formData.append("inputData", thisFile);
     formData.append("inputType", props.inputType);
+
+    if (props.isWordWise) formData.append("wordWise", props.isWordWise);
+
     const config = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     };
+
     axios
       .post(url, formData, config)
       .then((response) => {
-        setResult(srtParser.fromSrt(response.data));
+        if (props.isWordWise) setResult(response.data);
+        else setResult(srtParser.fromSrt(response.data));
+
+        console.log(response.data);
         setStatus(OperationStatus.done);
       })
       .catch((error) => {
@@ -162,6 +196,7 @@ const Result = (props) => {
             keyword={keyword}
             isIFrame={props.inputType === "url"}
             videoId={videoId}
+            isWordWise={props.isWordWise}
           />
         ) : status === OperationStatus.error ? (
           <p>{error.message}</p>

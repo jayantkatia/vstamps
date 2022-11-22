@@ -11,6 +11,12 @@ RUN apt-get update
 RUN apt-get install -y ffmpeg
 RUN pip install --upgrade pip
 
+# get and extract vosk-model
+RUN apt-get install -y wget unzip
+RUN wget https://alphacephei.com/vosk/models/vosk-model-en-us-0.21.zip
+RUN unzip vosk-model-en-us-0.21.zip
+RUN rm -rf vosk-model-en-us-0.21.zip
+
 # install python packages
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt

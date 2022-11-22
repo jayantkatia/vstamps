@@ -76,3 +76,7 @@
 .tile span.time a{
     font-weight: 600;
 }
+
+.bold {
+    font-weight: 700;
+}

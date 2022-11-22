@@ -1,3 +1,4 @@
+import '../styles/index.css';
 import '../styles/App.css';
 import logo from '../assets/github-logo.svg'
 import Form from './Form.js'
@@ -19,9 +20,12 @@ function App() {
   const [isInputTaken, setIsInputTaken] = useState(false)
   const [file, setFile] = useState()
   const [urlInput, setUrlInput] = useState()
+  const [isWordWise, setIsWordWise] = useState()
 
   const onFileUploadHandle = event => setFile(event.target.files[0])
-  const onUrlInputHandle = event => setUrlInput(event.target.value);
+  const onUrlInputHandle = event => setUrlInput(event.target.value)
+  const onIsWordWiseHandle = event => setIsWordWise(event.target.value)
+
   const onSubmitHandle = event => {
     event.preventDefault()
 
@@ -43,6 +47,7 @@ function App() {
     setFile()
     setUrlInput()
     setIsInputTaken()
+    setIsWordWise(false)
   }
 
   return (
@@ -52,6 +57,7 @@ function App() {
           ? <Result
             inputType={urlInput ? 'url' : 'file'}
             inputData={urlInput ? urlInput : file}
+            isWordWise={isWordWise}
             onBackButtonEvent={onBackButtonEvent}
           />
           : <>
@@ -60,6 +66,7 @@ function App() {
               onFileUploadHandle={onFileUploadHandle}
               onSubmitHandle={onSubmitHandle}
               onUrlInputHandle={onUrlInputHandle}
+              onIsWordWiseHandle={onIsWordWiseHandle}
               file={file?file.name:''}
             />
           </>
