@@ -34,6 +34,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 1em;
 }
 
 #load-container {
@@ -49,34 +50,31 @@
     font-size: large;
 }
 
-#transcriptions-container {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-content: space-between;
-    margin: 5px;
+td, th {
+    padding: 5px 4em;
 }
-.tile {
-    box-sizing: border-box;
-    width: 100%;
-    margin: 1px 2rem;
-    border: 1px solid black;
+@media only screen and (max-width: 800px) {
+    td, th {
+        padding: 5px;
+    }
 }
 
-.tile span a{
-    margin: 0 1rem;
+td {
     word-wrap: normal;
 }
 
-.tile span a{
-    margin: 0 1rem;
-    word-wrap: normal;
+table a {
+    text-decoration: none;
 }
 
-.tile span.time a{
-    font-weight: 600;
+
+table {
+    border-collapse: collapse;
+    border-radius: 10px;
+    border-style: hidden; /* hide standard table (collapsed) border */
+    box-shadow: 0 0 0 1px #666; /* this draws the table border  */ 
 }
 
-.bold {
-    font-weight: 700;
+td {
+    border: 1px solid #ccc;
 }

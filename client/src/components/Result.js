@@ -29,31 +29,33 @@ const Loading = (props) => {
 
 const Tile = (props) => {
   return (
-    <div className="tile">
-      {props.isIFrame ? (
-        <a
-          href={`https://youtu.be/${props.videoId}?t=${Math.floor(props.startSeconds)}`}
-          className="time"
-        >
-          {props.time}
-        </a>
-      ) : (
-        <span className="time">{props.time}</span>
-      )}{" "}
-      <span>{props.words}</span>
-    </div>
+    <tr>
+      <td>
+        {props.isIFrame ? (
+          <a
+            href={`https://youtu.be/${props.videoId}?t=${Math.floor(props.startSeconds)}`}
+            className="time"
+          >
+            {props.time}
+          </a>
+        ) : (
+          <span className="time">{props.time}</span>
+        )}
+      </td>
+      <td>{props.words}</td>
+    </tr>
   );
 };
 
 const Transcriptions = (props) => {
   return (
-    <div id="transcriptions-container">
-      <div className="tile bold">
-        <span>Time</span> <span>Words</span>
-      </div>
-      {props.isWordWise === "true" ? (
-        <>
-          {props.result.data.map((tile) => {
+    <table id="transcriptions-container">
+      <tbody>
+      <tr>
+        <th>Time</th> <th>Words</th>
+      </tr>
+      {props.isWordWise === "true"
+        ? props.result.data.map((tile) => {
             if (!props.keyword || tile[1].includes(props.keyword))
               return (
                 <Tile
@@ -66,11 +68,8 @@ const Transcriptions = (props) => {
                 />
               );
             return <></>;
-          })}
-        </>
-      ) : (
-        <>
-          {props.result.map((data) => {
+          })
+        : props.result.map((data) => {
             if (!props.keyword || data.text.includes(props.keyword))
               return (
                 <Tile
@@ -84,9 +83,8 @@ const Transcriptions = (props) => {
               );
             return <></>;
           })}
-        </>
-      )}
-    </div>
+      </tbody>
+    </table>
   );
 };
 
