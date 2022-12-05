@@ -32,5 +32,3 @@ RUN CLIENT_PORT=${CLIENT_PORT}
 WORKDIR /vstamps_client/express_server
 RUN npm install --quiet
 
-# install pm2
-RUN npm install pm2 -g
