@@ -112,11 +112,11 @@ def recieve_audio_file():
             video_id = url.split("v=")[1]
 
             # check if .srt file exists in cache directory
-            if os.path.exists(f'./cache/{video_id}.srt'):
+            if os.path.exists(f'./cache/{video_id}.srt') and request.form.get("wordWise") != "true":
                 log.info("SRT file found in cache, returning.")
                 return return_srt(f'./cache/{video_id}.srt')
 
-            if os.path.exists(f'./cache/{video_id}_wordWise.json'):
+            if os.path.exists(f'./cache/{video_id}_wordWise.json') and request.form.get("wordWise") == "true":
                 log.info("JSON file found in cache, returning.")
                 with open(f'./cache/{video_id}_wordWise.json') as f:
                     return json.load(f)
