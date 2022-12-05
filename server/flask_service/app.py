@@ -116,10 +116,10 @@ def recieve_audio_file():
                 log.info("SRT file found in cache, returning.")
                 return return_srt(f'./cache/{video_id}.srt')
 
-            if os.path.exists(f'./cache/{video_id}_wordWise.json') and request.form.get("wordWise") == "true":
-                log.info("JSON file found in cache, returning.")
-                with open(f'./cache/{video_id}_wordWise.json') as f:
-                    return json.load(f)
+            if os.path.exists(f'./cache/{video_id}_wordWise.csv') and request.form.get("wordWise") == "true":
+                log.info("Word Wise CSV file found in cache, returning as JSON.")
+                df = pd.read_csv(f'./cache/{video_id}_wordWise.csv')
+                return df.to_json(orient="split")
 
             # download youtube video in mp4
             yt = YouTube(url)
@@ -293,11 +293,11 @@ def get_data_word_wise(video_id: str = None):
     log.info('***** Timestamping for Transcript', i,
              'done! Returning DataFrame as JSON object *****')
 
-    # save dataframe to cache in json format if it was a youtube video.
+    # save dataframe to cache in csv format if it was a youtube video.
     if video_id:
-        df.to_json(f'./cache/{video_id}_wordWise.json')
+        df.to_csv(f'./cache/{video_id}_wordWise.csv', index=False)
         log.info(
-            f"get_data_word_wise | DataFrame saved to cache as {video_id}_wordWise.json")
+            f"get_data_word_wise | DataFrame saved to cache as {video_id}_wordWise.csv")
 
     return df.to_json(orient="split")
 

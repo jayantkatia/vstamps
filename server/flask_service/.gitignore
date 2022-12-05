@@ -174,7 +174,8 @@ vosk-model-en-us-0.21/
 
 # Data
 *.srt 
-*wordwise.json
+*wordWise.json
+*wordWise.csv
 video.mp4
 temp.wav
 !test.srt
