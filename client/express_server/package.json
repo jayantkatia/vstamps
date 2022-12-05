@@ -1,0 +1,14 @@
+{
+  "name": "express_server",
+  "version": "1.0.0",
+  "description": "Express server to use web assembly",
+  "main": "app.js",
+  "repository": "http://github.com/jayantkatia/vstamps",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}

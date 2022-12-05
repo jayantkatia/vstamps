@@ -10,7 +10,7 @@ services:
         SERVER_URL: ${SERVER_URL}
     ports:
       - ${EXPOSED_CLIENT_PORT}:${CLIENT_PORT}
-    command: serve -s build -p ${CLIENT_PORT}
+    command: pm2 start app.js
 
   server:
     build: 
