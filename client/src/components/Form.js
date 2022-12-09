@@ -17,7 +17,7 @@ const Form = (props) => {
                 <input type="text" id="url" name="url" placeholder="Enter YouTube link" autoComplete="off" onChange={props.onUrlInputHandle} />
                 <Divider />
                 
-                <FileUploader handleChange={props.onFileUploadHandle} name="file" dropMessageStyle={{position:'absolute', left: '-100%', width: "198%", background: 'whitesmoke'}} types={['mp4','mp3','wav', 'mov', 'avi', 'wmv', 'qt', 'flv', 'swf', 'avchd', 'm4p', 'm4v', 'ogg', 'webm', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'mp4a', 'aac', 'oga', 'flac', 'pcm', 'aiff', 'wma']} hoverTitle=' '
+                <FileUploader handleChange={props.onFileUploadHandle} name="file" dropMessageStyle={{position:'absolute', left: '-100%', width: "198%", background: 'whitesmoke'}} types={['mp4','mp3','wav', 'mov', 'avi', 'wmv', 'qt', 'flv', 'swf', 'avchd', 'm4p', 'm4v', 'ogg', 'webm', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'mp4a', 'aac', 'oga', 'flac', 'pcm', 'aiff', 'wma', 'm4a']} hoverTitle=' '
                     children={
                         <div className="drag-container">
                             <p>Drag or Click on the button to upload video/audio files</p>
