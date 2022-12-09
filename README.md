@@ -9,7 +9,7 @@ Search video for timestamps
 5. Clone the repo and change directory to the repo
     > [if repo private] Enter username and personal access token
 6. Change ```SERVER_URL``` to your public IP/DNS in ```.env``` and ```./nginx/default```. Run
-    ```
+    ```sh
     vi .env
 
     vi ./nginx/default 
@@ -19,13 +19,27 @@ Search video for timestamps
     # :wq to save and exit
     ```
 7. Run
+    ```sh
+    source script.sh
+    vstamps_init
+
+    ```
+8. Run Docker containers
+    ```sh
+    docker-compose up -d
+    ```
+9. Test and change configurations in ```/etc/nginx/sites-enabled/default``` and ```/etc/nginx/nginx.conf```  if needed. For example, 
 ```
-source script.sh
-vstamps_init
+# nginx.conf
+
+http {
+
+    # add to increase req body
+    client_max_body_size 500M;
+}
 
 ```
-8. Test and change configurations in ```/etc/nginx/sites-enabled/default``` if needed
-9. 🚀 Deployed!
+11. 🚀 Deployed!
 
 ## Client
 1. Change directory to client, ```cd client``` 

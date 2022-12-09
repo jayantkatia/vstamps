@@ -5,7 +5,7 @@
 
 function vstamps_init() {
   # upgrade
-  sudo apt update -y
+  sudo apt update && sudo apt upgrade -y
 
   # get env variables
   source .env
@@ -15,7 +15,6 @@ function vstamps_init() {
   sudo sh get-docker.sh
   sudo apt-get install -y docker-compose
   sudo usermod -aG docker $USER
-  newgrp docker
 
   # installing nginx and ssl certificate
   sudo apt install -y nginx
@@ -33,6 +32,6 @@ function vstamps_init() {
   sudo nginx -t
   sudo service nginx start
   
-  # docker up instances
-  docker-compose up -d
+  # refreshing docker additions
+  newgrp docker
 }
