@@ -3,7 +3,7 @@
 # Installation Script #
 # Run on a fresh server to install docker and nginx
 
-function init() {
+function vstamps_init() {
   # upgrade
   sudo apt update -y
 

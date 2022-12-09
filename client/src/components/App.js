@@ -22,7 +22,7 @@ function App() {
   const [urlInput, setUrlInput] = useState()
   const [isWordWise, setIsWordWise] = useState()
 
-  const onFileUploadHandle = event => setFile(event.target.files[0])
+  const onFileUploadHandle = file => setFile(file)
   const onUrlInputHandle = event => setUrlInput(event.target.value)
   const onIsWordWiseHandle = event => setIsWordWise(event.target.value)
 
