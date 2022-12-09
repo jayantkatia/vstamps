@@ -5,12 +5,11 @@ services:
       context: ./client/
       args:
         CLIENT_PORT: ${CLIENT_PORT}
-        SERVER_PORT: ${SERVER_PORT}
         SERVER_PROTOCOL: ${SERVER_PROTOCOL}
         SERVER_URL: ${SERVER_URL}
     ports:
       - ${EXPOSED_CLIENT_PORT}:${CLIENT_PORT}
-    command: pm2 start app.js
+    command: node app.js
 
   server:
     build: 

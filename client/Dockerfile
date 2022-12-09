@@ -6,7 +6,6 @@ FROM node:lts-alpine
 # get all arguments
 ARG SERVER_PROTOCOL
 ARG SERVER_URL
-ARG SERVER_PORT
 ARG CLIENT_PORT
 
 # change cwd
@@ -24,7 +23,6 @@ COPY . .
 # create production build
 RUN REACT_APP_SERVER_PROTOCOL=${SERVER_PROTOCOL} \
   REACT_APP_SERVER_URL=${SERVER_URL} \
-  REACT_APP_SERVER_PORT=${SERVER_PORT} \ 
   npm run build
 
 # create express server

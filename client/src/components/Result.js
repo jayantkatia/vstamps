@@ -123,7 +123,7 @@ const Result = (props) => {
     // post request to server to transcribe
     setStatus(OperationStatus.transcribe);
 
-    const url = `${process.env.REACT_APP_SERVER_PROTOCOL}://${process.env.REACT_APP_SERVER_URL}:${process.env.REACT_APP_SERVER_PORT}/recieveAudioFile`;
+    const url = `${process.env.REACT_APP_SERVER_PROTOCOL}://${process.env.REACT_APP_SERVER_URL}/recieveAudioFile`;
 
     const formData = new FormData();
     formData.append("inputData", thisFile);
